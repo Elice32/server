@@ -1,0 +1,141 @@
+/* Основные стили */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: center;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  h1 {
+    color: #4A90E2;
+    margin: 20px 0;
+    font-size: 2.5rem;
+  }
+  
+  /* Ссылки */
+  a {
+    text-decoration: none;
+    color: #007BFF;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 10px 0;
+    display: inline-block;
+    transition: color 0.3s ease;
+  }
+  
+  a:hover {
+    color: #0056b3;
+  }
+  
+  /* Список пользователей */
+  #userList {
+    list-style-type: none;
+    padding: 0;
+    margin: 20px 0;
+    max-width: 600px;
+    width: 100%;
+  }
+  
+  #userList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  #userList li button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  #userList li button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 600px) {
+    h1 {
+      font-size: 2rem;
+    }
+  
+    a {
+      font-size: 1rem;
+    }
+  
+    #userList li {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    #userList li button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  }
+
+
+  /* Контейнер для списка друзей */
+#userList {
+  max-height: 300px; /* Ограничение по высоте */
+  overflow-y: auto; /* Добавляем вертикальную прокрутку */
+  padding: 10px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* Список друзей */
+#userList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+#userList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#userList li:last-child {
+  margin-bottom: 0;
+}
+
+#userList li button {
+  padding: 8px 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#userList li button:hover {
+  background-color: #45a049;
+}
