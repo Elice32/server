@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/site.css">
+    <title>Главная страница</title>
+</head>
+
+<body>
+    <h1>Добро пожаловать на сайт!</h1>
+    <p><a href="/register.html">Регистрация</a></p>
+    <p><a href="/login.html">Вход</a></p>
+    <p><a href="/profile">Профиль</a></p>
+    <p><a href="/chat.html">Личный чат</a></p>
+    <p><a href="/allchat.html">Групповой чат</a></p>
+    <h1>Выберите пользователя для добавления в друзья</h1>
+    <ul id="userList"></ul>
+
+    <script>
+          // Функция для загрузки пользователей
+          function loadUsers() {
+            fetch('/users')
+                .then(response => response.json())
+                .then(users => {
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = ''; // Очищаем список
+                    users.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = user.username;
+                        const addButton = document.createElement('button');
+                        addButton.textContent = 'Добавить в друзья';
+                        addButton.onclick = () => addFriend(user.id);
+                        li.appendChild(addButton);
+                        userList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Ошибка при загрузке пользователей:', error));
+        }
+
+ // Функция для добавления друга
+function addFriend(friendId) {
+    const userId = sessionStorage.getItem('userId'); // Получаем userId из sessionStorage
+    if (!userId) {
+        alert('Вы должны быть вошли в систему, чтобы добавлять друзей.');
+        return;
+    }
+
+    fetch(`/users/${userId}/friends`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ friendId: friendId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(err => { throw new Error(err); });
+        }
+        return response.text();
+    })
+    .then(data => {
+        alert(data);
+        loadUsers(); // Обновляем список пользователей
+    })
+    .catch(error => {
+        // Обрабатываем ошибку, если друг уже в друзьях или если пользователь пытается добавить себя
+        if (error.message === 'Ошибка: Вы не можете добавить себя в друзья.') {
+            alert('Вы не можете добавить себя в друзья!');
+        } else if (error.message === 'Ошибка: Этот пользователь уже в друзьях') {
+            alert('Этот пользователь уже в друзьях!');
+        } else {
+            console.error('Ошибка при добавлении друга:', error);
+            alert('Произошла ошибка при добавлении друга: ' + error.message);
+        }
+    });
+}
+
+
+        // Загружаем пользователей при загрузке страницы
+        loadUsers();
+    </script>
+</body>
+</html>

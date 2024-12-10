@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/allchat.css">
+    <title>Групповой чат</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Создание группового чата</h1>
+        <form id="chat-form">
+            <label for="chat-name">Название чата:</label>
+            <input type="text" id="chat-name" required>
+
+            <label for="users">Выберите пользователей:</label>
+            <select id="users" multiple required></select>
+
+            <button type="submit">Создать чат</button>
+        </form>
+
+        <h2>Отправка сообщения в групповой чат</h2>
+        <form id="message-form">
+            <label for="group-chat">Выберите групповой чат:</label>
+            <select id="group-chat" required></select>
+
+            <label for="message">Сообщение:</label>
+            <textarea id="message" required></textarea>
+
+            <button type="submit">Отправить сообщение</button>
+        </form>
+
+        <div id="message-response"></div>
+    </div>
+    <script>
+        // Populate users dropdown
+        fetch('/users')
+            .then(response => response.json())
+            .then(users => {
+                const usersSelect = document.getElementById('users');
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.text = user.username;
+                    usersSelect.appendChild(option);
+                });
+            });
+
+        fetch('/group-chats')
+            .then(response => response.json())
+            .then(chats => {
+                const chatsSelect = document.getElementById('group-chat');
+                chats.forEach(chat => {
+                    const option = document.createElement('option');
+                    option.value = chat.id;
+                    option.text = chat.name;
+                    chatsSelect.appendChild(option);
+                });
+            });
+
+        // Create chat form submission
+        document.getElementById('chat-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const chatName = document.getElementById('chat-name').value;
+            const userIds = Array.from(document.getElementById('users').selectedOptions).map(option => option.value);
+            fetch('/create-chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatName, userIds })
+            });
+        });
+
+        // Send message form submission
+        document.getElementById('message-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const chatId = document.getElementById('group-chat').value;
+            const message = document.getElementById('message').value;
+            fetch('/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chatId, message })
+            });
+        });
+        </script>
+</body>
+</html>

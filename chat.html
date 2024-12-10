@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/chat.css">
+
+  <title>Чат</title>
+</head>
+<body>
+  <h1>Чат</h1>
+  <select id="recipientSelect"></select>
+  <input type="file" name="file" id="file" accept="image/*, .pdf, .doc, .docx, .txt">
+  <input type="text" id="messageInput" placeholder="Введите сообщение..." />
+  <input type="hidden" name="recipientId" id="recipientId">
+  <button id="sendMessage">Отправить</button>
+  <div id="chatContainer">
+    <ul id="messagesList"></ul>
+  </div>
+  <script>
+    const userId = sessionStorage.getItem('userId');
+    const chatContainer = document.getElementById('messagesList');
+
+    function loadRecipients() {
+      fetch('/users')
+        .then(response => response.json())
+        .then(users => {
+          const recipientSelect = document.getElementById('recipientSelect');
+          users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.textContent = user.username;
+            recipientSelect.appendChild(option);
+          });
+        })
+        .catch(error => console.error('Ошибка при загрузке пользователей:', error));
+    }
+
+    function loadMessages() {
+      fetch(`/chat/${userId}`)
+        .then(response => response.json())
+        .then(messages => {
+          chatContainer.innerHTML = '';
+          messages.forEach(message => {
+            const li = document.createElement('li');
+            //li.textContent = `${message.sender} (для ${message.recipient}): ${message.text} (${new Date(message.created_at).toLocaleString()})`;
+            let messageText = `${message.sender} (для ${message.recipient}): ${message.text} (${new Date(message.created_at).toLocaleString()})`;
+                if (message.filename) {
+                messageText += ` <a href="/uploads/${message.filename}" download>${message.filename}</a>`;
+                }
+                li.innerHTML = messageText;
+                chatContainer.appendChild(li);
+            });
+        })
+        .catch(error => console.error('Ошибка при загрузке сообщений:', error));
+    }
+
+    function saveMessage(userId, text, recipientId, attachmentId, filename) {
+  connection.query('INSERT INTO messages (sender_id, text, created_at, attachment_id) VALUES (?, ?, NOW(), ?)', [userId, text, attachmentId], (error, results) => {
+    if (error) {
+      console.error('Ошибка при сохранении сообщения:', error);
+      return res.status(500).json({ error: 'Ошибка сервера' });
+    }
+    const messageId = results.insertId;
+    connection.query('INSERT INTO message_recipients (message_id, recipient_id) VALUES (?, ?)', [messageId, recipientId], (error) => {
+      if (error) {
+        console.error('Ошибка при сохранении получателя:', error);
+        return res.status(500).json({ error: 'Ошибка сервера' });
+      }
+      res.status(201).json({ success: true, filename });
+    });
+  });
+}
+
+    document.getElementById('sendMessage').addEventListener('click', () => {
+      const messageInput = document.getElementById('messageInput');
+      const messageText = messageInput.value;
+      const recipientId = document.getElementById('recipientSelect').value;
+      const fileInput = document.getElementById('file');
+      const file = fileInput.files[0];
+        
+      if (!messageText) {
+        alert('Введите сообщение!');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('userId', userId);
+      formData.append('recipientId', recipientId);
+      formData.append('text', messageText);
+      if (file) {
+        formData.append('file', file);
+      }
+
+      fetch(`/chat/send`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.text().then(err => { throw new Error(err); });
+        }
+        messageInput.value = '';
+        fileInput.value = '';
+        loadMessages();
+      })
+      .catch(error => {
+        console.error('Ошибка при отправке сообщения:', error);
+        alert('Произошла ошибка при отправке сообщения: ' + error.message);
+      });
+    });
+
+    loadMessages();
+    loadRecipients();
+  </script>
+
+  
+</body>
+</html>
